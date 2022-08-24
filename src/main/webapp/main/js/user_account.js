@@ -79,14 +79,14 @@ $(document).ready(function () {
           })
           .then((res) => {
             console.log(res);
-            var day1 = new Date(res.orderEndDate);
-            var day2 = new Date(res.orderStartDate);
-            console.log("day1=" + day1);
-            console.log("day2=" + day2);
-            var difference = parseInt(
-              Math.abs(day1 - day2) / (1000 * 60 * 60 * 24)
-            );
-            console.log("訂單天數=" + difference);
+            // var day1 = new Date(res.orderEndDate);
+            // var day2 = new Date(res.orderStartDate);
+            // console.log("day1=" + day1);
+            // console.log("day2=" + day2);
+            // var difference = parseInt(
+            //   Math.abs(day1 - day2) / (1000 * 60 * 60 * 24)
+            // );
+            // console.log("訂單天數=" + difference);
             let list_html = "";
             list_html += `
             <div
@@ -123,13 +123,13 @@ $(document).ready(function () {
                     </div>
                     <div class="row">
                       <div class="col-md-4">
-                        入住日期：<span class="start-date">${res.orderStartDate}</span>
+                        入住日期：<span class="start-date" data-start="${response[index].salesOrderHeaderId}">${res.orderStartDate}</span>
                       </div>
                       <div class="col-md-4 ml-auto">附加優惠：自助吧早餐</div>
                     </div>
                     <div class="row">
                       <div class="col-md-4">
-                        退房日期：<span class="end-date">${res.orderEndDate}</span>
+                        退房日期：<span class="end-date" data-end="${response[index].salesOrderHeaderId}">${res.orderEndDate}</span>
                       </div>
                     </div>
                     <div class="row">
@@ -175,16 +175,17 @@ $(document).ready(function () {
                       <div class="col-md-4">其他服務</div>
                     </div>
                     <div class="row">
-                      <a id="restaurantOrder" class="col-md-2" href="rest_book.html">餐廳加購</a>
+                      <a id="restaurantOrder" class="col-md-2" data-hide="${response[index].salesOrderHeaderId}" href="rest_book.html">餐廳加購</a>
                       <a
                         class="btn btn-primary"
                         data-toggle="modal"
                         data-target="#cf${response[index].salesOrderHeaderId}"
+                        data-hide="${response[index].salesOrderHeaderId}"
                         id="dateUpdatedButton"
                       >
                         日期修改
                       </a>
-                      <a id="cancelOrder" class="col-md-2 order_cancel" data-id="${response[index].salesOrderHeaderId}" href="#">取消訂單</a>
+                      <a id="cancelOrder" class="col-md-2 order_cancel" data-hide="${response[index].salesOrderHeaderId}" data-id="${response[index].salesOrderHeaderId}" href="#">取消訂單</a>
                     </div>
                     <div class="order-item-price">
                       <p>總金額：<span class="price${response[index].salesOrderHeaderId}"></span>元</p>
@@ -252,15 +253,16 @@ $(document).ready(function () {
       </div>
                 `;
             $("body").append(list_html);
-            console.log("訂單狀態=" + response[index].salesOrderStatus);
+            console.log("訂單狀態1=" + response[index].salesOrderStatus);
             if (
               response[index].salesOrderStatus === "已完成" ||
               response[index].salesOrderStatus === "已取消"
             ) {
-              $("#dateUpdatedButton").addClass("-none");
-              $("#cancelOrder").addClass("-none");
-              $("#restaurantOrder").addClass("-none");
+              $(
+                `a[data-hide = ${response[index].salesOrderHeaderId}]`
+              ).addClass("-none");
             }
+            // console.log("訂單狀態2=" + response[index].salesOrderStatus);
             //Fetch無法存全域變數，為取得原訂單日期，故將以下放進這裡
             //==========點修改日期時也關掉第一個彈窗===============================
             $(document).on("click", "#dateUpdatedButton", function () {
@@ -303,6 +305,20 @@ $(document).ready(function () {
                       Math.abs(day3 - day4) / (1000 * 60 * 60 * 24)
                     );
 
+                    // console.log("原訂單天數=" + difference);
+                    console.log("id=" + id);
+                    // $(`.item[data-number-type="${num}"]`)
+                    console.log($(`span[data-start = ${id}]`).html());
+                    console.log(
+                      "原訂單結束=" + $(`span[data-end = ${id}]`).html()
+                    );
+                    var day1 = new Date($(`span[data-start = ${id}]`).html());
+                    var day2 = new Date($(`span[data-end = ${id}]`).html());
+                    console.log("day1=" + day1);
+                    console.log("day2=" + day2);
+                    var difference = parseInt(
+                      Math.abs(day1 - day2) / (1000 * 60 * 60 * 24)
+                    );
                     console.log("原訂單天數=" + difference);
                     console.log("欲修改訂單天數=" + newDifference);
                     if (newDifference != difference) {
